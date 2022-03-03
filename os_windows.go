@@ -2,13 +2,14 @@ package main
 
 import (
 	"fmt"
-	"golang.org/x/sys/windows"
 	"log"
 	"os"
 	"os/exec"
 	"os/user"
 	"path/filepath"
 	"strings"
+
+	"golang.org/x/sys/windows"
 )
 
 var (
@@ -27,6 +28,7 @@ var (
 	gDefaultSocketPath = "127.0.0.1:12345"
 )
 
+// XXX: gUser/gXXXPaths are global variables(can be split to pkgs)
 var (
 	gUser        *user.User
 	gConfigPaths []string

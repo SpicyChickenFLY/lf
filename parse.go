@@ -40,7 +40,7 @@ import (
 
 type expr interface {
 	String() string
-	eval(app *app, args []string)
+	eval(app *App, args []string)
 }
 
 type setExpr struct {

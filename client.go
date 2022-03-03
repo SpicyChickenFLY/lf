@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/SpicyChickenFLY/lf/pkg/app"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -38,26 +39,7 @@ func run() {
 	}
 
 	log.Print("hi!")
-
-	ui := newUI(screen)
-	nav := newNav(ui.wins[0].h)
-	app := newApp(ui, nav)
-
-	if err := nav.sync(); err != nil {
-		app.ui.echoerrf("sync: %s", err)
-	}
-
-	if err := app.nav.readMarks(); err != nil {
-		app.ui.echoerrf("reading marks file: %s", err)
-	}
-
-	if err := app.readHistory(); err != nil {
-		app.ui.echoerrf("reading history file: %s", err)
-	}
-
-	app.loop()
-
-	app.ui.screen.Fini()
+	app.NewApp(screen).Run()
 }
 
 func readExpr() <-chan expr {

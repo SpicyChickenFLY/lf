@@ -1,5 +1,7 @@
 package main
 
+// XXX: this file can be treat as single pkg
+
 import (
 	"io/ioutil"
 	"log"
@@ -9,6 +11,7 @@ import (
 	"strings"
 )
 
+// XXX: these global variables only used in this file
 var (
 	gCmdWords = []string{
 		"set",

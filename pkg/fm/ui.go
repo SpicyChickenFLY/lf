@@ -1,4 +1,4 @@
-package main
+package fm
 
 import (
 	"bytes"
@@ -19,6 +19,8 @@ import (
 	"github.com/mattn/go-runewidth"
 	"golang.org/x/term"
 )
+
+// XXX: ui used by app.go nav.go ui.go eval.go
 
 const gEscapeCode = 27
 

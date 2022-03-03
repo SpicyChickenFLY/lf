@@ -1,0 +1,5 @@
+package fm
+
+func EchoErr() {
+
+}

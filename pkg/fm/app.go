@@ -1,4 +1,4 @@
-package main
+package fm
 
 import (
 	"bufio"
@@ -12,14 +12,18 @@ import (
 	"strings"
 	"syscall"
 	"time"
+
+	"github.com/gdamore/tcell/v2"
 )
 
+// XXX: we should make api exported here but not let them pass as param
+// app.ui.echoerr -> fm.EchoErr
 type cmdItem struct {
 	prefix string
 	value  string
 }
 
-type app struct {
+type App struct {
 	ui            *ui
 	nav           *nav
 	ticker        *time.Ticker
@@ -50,10 +54,16 @@ func init() {
 	gInvalidate.period = true
 }
 
-func newApp(ui *ui, nav *nav) *app {
+func NewApp(screen tcell.Screen) *App {
+	ui := newUI(screen)
+	nav := newNav(ui.wins[0].h)
+	return newApp(ui, nav)
+}
+
+func newApp(ui *ui, nav *nav) *App {
 	quitChan := make(chan struct{}, 1)
 
-	app := &app{
+	app := &App{
 		ui:       ui,
 		nav:      nav,
 		ticker:   new(time.Ticker),
@@ -76,7 +86,7 @@ func newApp(ui *ui, nav *nav) *app {
 	return app
 }
 
-func (app *app) quit() {
+func (app *App) quit() {
 	if err := app.writeHistory(); err != nil {
 		log.Printf("writing history file: %s", err)
 	}
@@ -92,7 +102,7 @@ func (app *app) quit() {
 	}
 }
 
-func (app *app) readFile(path string) {
+func (app *App) readFile(path string) {
 	log.Printf("reading file: %s", path)
 
 	f, err := os.Open(path)
@@ -113,73 +123,7 @@ func (app *app) readFile(path string) {
 	}
 }
 
-func loadFiles() (list []string, cp bool, err error) {
-	files, err := os.Open(gFilesPath)
-	if os.IsNotExist(err) {
-		err = nil
-		return
-	}
-	if err != nil {
-		err = fmt.Errorf("opening file selections file: %s", err)
-		return
-	}
-	defer files.Close()
-
-	s := bufio.NewScanner(files)
-
-	s.Scan()
-
-	switch s.Text() {
-	case "copy":
-		cp = true
-	case "move":
-		cp = false
-	default:
-		err = fmt.Errorf("unexpected option to copy file(s): %s", s.Text())
-		return
-	}
-
-	for s.Scan() && s.Text() != "" {
-		list = append(list, s.Text())
-	}
-
-	if s.Err() != nil {
-		err = fmt.Errorf("scanning file list: %s", s.Err())
-		return
-	}
-
-	log.Printf("loading files: %v", list)
-
-	return
-}
-
-func saveFiles(list []string, cp bool) error {
-	if err := os.MkdirAll(filepath.Dir(gFilesPath), os.ModePerm); err != nil {
-		return fmt.Errorf("creating data directory: %s", err)
-	}
-
-	files, err := os.Create(gFilesPath)
-	if err != nil {
-		return fmt.Errorf("opening file selections file: %s", err)
-	}
-	defer files.Close()
-
-	log.Printf("saving files: %v", list)
-
-	if cp {
-		fmt.Fprintln(files, "copy")
-	} else {
-		fmt.Fprintln(files, "move")
-	}
-
-	for _, f := range list {
-		fmt.Fprintln(files, f)
-	}
-
-	return nil
-}
-
-func (app *app) readHistory() error {
+func (app *App) readHistory() error {
 	f, err := os.Open(gHistoryPath)
 	if os.IsNotExist(err) {
 		return nil
@@ -210,7 +154,7 @@ func (app *app) readHistory() error {
 	return nil
 }
 
-func (app *app) writeHistory() error {
+func (app *App) writeHistory() error {
 	if len(app.cmdHistory) == 0 {
 		return nil
 	}
@@ -249,11 +193,29 @@ func (app *app) writeHistory() error {
 	return nil
 }
 
+func (app *App) Run() {
+	if err := app.nav.sync(); err != nil {
+		app.ui.echoerrf("sync: %s", err)
+	}
+
+	if err := app.nav.readMarks(); err != nil {
+		app.ui.echoerrf("reading marks file: %s", err)
+	}
+
+	if err := app.readHistory(); err != nil {
+		app.ui.echoerrf("reading history file: %s", err)
+	}
+
+	app.loop()
+
+	app.ui.screen.Fini()
+}
+
 // This is the main event loop of the application. Expressions are read from
 // the client and the server on separate goroutines and sent here over channels
 // for evaluation. Similarly directories and regular files are also read in
 // separate goroutines and sent here for update.
-func (app *app) loop() {
+func (app *App) loop() {
 	go app.nav.previewLoop(app.ui)
 
 	var serverChan <-chan expr
@@ -535,7 +497,7 @@ func (app *app) loop() {
 //     %       No    No     Yes    Yes     Yes     Statline for input/output
 //     !       Yes   No     Yes    Yes     Yes     Pause and then resume
 //     &       No    Yes    No     No      No      Do nothing
-func (app *app) runShell(s string, args []string, prefix string) {
+func (app *App) runShell(s string, args []string, prefix string) {
 	app.nav.exportFiles()
 	exportOpts()
 

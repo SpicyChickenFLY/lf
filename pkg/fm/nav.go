@@ -1,4 +1,4 @@
-package main
+package fm
 
 import (
 	"bufio"
