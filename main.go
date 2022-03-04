@@ -21,6 +21,15 @@ var (
 
 type arrayFlag []string
 
+func (a *arrayFlag) Set(v string) error {
+	*a = append(*a, v)
+	return nil
+}
+
+func (a *arrayFlag) String() string {
+	return strings.Join(*a, ", ")
+}
+
 var (
 	gSingleMode    bool
 	gClientID      int
@@ -36,15 +45,6 @@ var (
 	gVersion       string
 )
 
-func (a *arrayFlag) Set(v string) error {
-	*a = append(*a, v)
-	return nil
-}
-
-func (a *arrayFlag) String() string {
-	return strings.Join(*a, ", ")
-}
-
 func init() {
 	h, err := os.Hostname()
 	if err != nil {
@@ -58,6 +58,7 @@ func init() {
 }
 
 func exportEnvVars() {
+
 	os.Setenv("id", strconv.Itoa(gClientID))
 
 	os.Setenv("OPENER", envOpener)

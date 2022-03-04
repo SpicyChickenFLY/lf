@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"fmt"
@@ -93,6 +93,7 @@ func detachedCommand(name string, arg ...string) *exec.Cmd {
 	return cmd
 }
 
+// FIXME: the shell type should be passed by param
 func shellCommand(s string, args []string) *exec.Cmd {
 	args = append([]string{gOpts.shellflag, s}, args...)
 
@@ -131,7 +132,7 @@ func isExecutable(f os.FileInfo) bool {
 	return false
 }
 
-func isHidden(f os.FileInfo, path string, hiddenfiles []string) bool {
+func IsHidden(f os.FileInfo, path string, hiddenfiles []string) bool {
 	ptr, err := windows.UTF16PtrFromString(filepath.Join(path, f.Name()))
 	if err != nil {
 		return false

@@ -15,6 +15,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/gokcehan/lf/pkg/utils"
 	times "gopkg.in/djherbis/times.v1"
 )
 
@@ -179,7 +180,7 @@ func (dir *dir) sort() {
 	case naturalSort:
 		sort.SliceStable(dir.files, func(i, j int) bool {
 			s1, s2 := normalize(dir.files[i].Name(), dir.files[j].Name(), dir.ignorecase, dir.ignoredia)
-			return naturalLess(s1, s2)
+			return utils.NaturalLess(s1, s2)
 		})
 	case nameSort:
 		sort.SliceStable(dir.files, func(i, j int) bool {
@@ -263,18 +264,18 @@ func (dir *dir) sort() {
 	// files to the first non-hidden file in the list
 	if dir.sortType.option&hiddenSort == 0 {
 		sort.SliceStable(dir.files, func(i, j int) bool {
-			if isHidden(dir.files[i], dir.path, dir.hiddenfiles) && isHidden(dir.files[j], dir.path, dir.hiddenfiles) {
+			if utils.IsHidden(dir.files[i], dir.path, dir.hiddenfiles) && utils.IsHidden(dir.files[j], dir.path, dir.hiddenfiles) {
 				return i < j
 			}
-			return isHidden(dir.files[i], dir.path, dir.hiddenfiles)
+			return utils.IsHidden(dir.files[i], dir.path, dir.hiddenfiles)
 		})
 		for i, f := range dir.files {
-			if !isHidden(f, dir.path, dir.hiddenfiles) {
+			if !utils.IsHidden(f, dir.path, dir.hiddenfiles) {
 				dir.files = dir.files[i:]
 				break
 			}
 		}
-		if len(dir.files) > 0 && isHidden(dir.files[len(dir.files)-1], dir.path, dir.hiddenfiles) {
+		if len(dir.files) > 0 && utils.IsHidden(dir.files[len(dir.files)-1], dir.path, dir.hiddenfiles) {
 			dir.files = dir.files[len(dir.files):]
 		}
 	}

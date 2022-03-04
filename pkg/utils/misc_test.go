@@ -238,7 +238,7 @@ func TestNaturalLess(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		if got := naturalLess(test.s1, test.s2); got != test.exp {
+		if got := NaturalLess(test.s1, test.s2); got != test.exp {
 			t.Errorf("at input '%s' and '%s' expected '%t' but got '%t'", test.s1, test.s2, test.exp, got)
 		}
 	}

@@ -234,11 +234,15 @@ func humanize(size int64) string {
 	return ""
 }
 
-// This function compares two strings for natural sorting which takes into
+func IsByteDigit(b byte) bool {
+	return '0' <= b && b <= '9'
+}
+
+// NaturalLess compares two strings for natural sorting which takes into
 // account values of numbers in strings. For example, '2' is less than '10',
 // and similarly 'foo2bar' is less than 'foo10bar', but 'bar2bar' is greater
 // than 'foo10bar'.
-func naturalLess(s1, s2 string) bool {
+func NaturalLess(s1, s2 string) bool {
 	lo1, lo2, hi1, hi2 := 0, 0, 0, 0
 	for {
 		if hi1 >= len(s1) {
@@ -249,13 +253,13 @@ func naturalLess(s1, s2 string) bool {
 			return false
 		}
 
-		isDigit1 := isDigit(s1[hi1])
-		isDigit2 := isDigit(s2[hi2])
+		isDigit1 := IsByteDigit(s1[hi1])
+		isDigit2 := IsByteDigit(s2[hi2])
 
-		for lo1 = hi1; hi1 < len(s1) && isDigit(s1[hi1]) == isDigit1; hi1++ {
+		for lo1 = hi1; hi1 < len(s1) && IsByteDigit(s1[hi1]) == isDigit1; hi1++ {
 		}
 
-		for lo2 = hi2; hi2 < len(s2) && isDigit(s2[hi2]) == isDigit2; hi2++ {
+		for lo2 = hi2; hi2 < len(s2) && IsByteDigit(s2[hi2]) == isDigit2; hi2++ {
 		}
 
 		if s1[lo1:hi1] == s2[lo2:hi2] {

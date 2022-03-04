@@ -100,25 +100,23 @@ func (app *App) quit() {
 			}
 		}
 	}
-}
+}Premium
 
-func (app *App) readFile(path string) {
-	log.Printf("reading file: %s", path)
 
-	f, err := os.Open(path)
-	if err != nil {
-		app.ui.echoerrf("opening file: %s", err)
-		return
-	}
-	defer f.Close()
 
-	p := newParser(f)
 
-	for p.parse() {
-		p.expr.eval(app, nil)
-	}
 
-	if p.err != nil {
+
+
+
+
+
+
+
+
+
+
+
 		app.ui.echoerrf("%s", p.err)
 	}
 }

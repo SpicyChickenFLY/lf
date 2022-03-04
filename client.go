@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/SpicyChickenFLY/lf/pkg/app"
 	"github.com/gdamore/tcell/v2"
 )
 
@@ -39,7 +38,7 @@ func run() {
 	}
 
 	log.Print("hi!")
-	app.NewApp(screen).Run()
+	fm.NewApp(screen).Run()
 }
 
 func readExpr() <-chan expr {
